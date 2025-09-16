@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentora - Your Personal AI Career Mentor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .chat-animation {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .typing-indicator {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+        
+        .floating-chat {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 380px;
+            height: 500px;
+            z-index: 1001;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        @media (max-width: 640px) {
+            .chat-window {
+                width: calc(100vw - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
+        
+        /* Enhanced Background Animations */
+        .floating-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .floating-element {
+            position: absolute;
+            color: #3b82f6;
+            opacity: 0.4;
+            font-size: 2rem;
+            animation: floatUp 25s infinite linear;
+        }
+        
+        .floating-element.purple { color: #8b5cf6; }
+        .floating-element.green { color: #10b981; }
+        .floating-element.yellow { color: #f59e0b; }
+        .floating-element.pink { color: #ec4899; }
+        .floating-element.indigo { color: #6366f1; }
+        
+        .floating-element.slow {
+            animation-duration: 35s;
+        }
+        
+        .floating-element.fast {
+            animation-duration: 18s;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.4;
+            }
+            90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .floating-element-down {
+            position: absolute;
+            font-size: 2.5rem;
+            opacity: 0.3;
+            animation: floatDown 30s infinite linear;
+        }
+        
+        @keyframes floatDown {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(100vh) rotate(-360deg);
+                opacity: 0;
+            }
+        }
+        
+        .floating-horizontal {
+            position: absolute;
+            color: #6366f1;
+            opacity: 0.25;
+            font-size: 1.8rem;
+            animation: floatHorizontal 40s infinite linear;
+        }
+        
+        @keyframes floatHorizontal {
+            0% {
+                transform: translateX(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.25;
+            }
+            90% {
+                opacity: 0.25;
+            }
+            100% {
+                transform: translateX(calc(100vw + 100px)) rotate(180deg);
+                opacity: 0;
+            }
+        }
+        
+        .geometric-shape {
+            position: absolute;
+            opacity: 0.2;
+            animation: floatUp 28s infinite linear;
+        }
+        
+        .shape-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+        }
+        
+        .shape-square {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #10b981, #f59e0b);
+        }
+        
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 35px solid #ec4899;
+        }
+        
+        /* Microphone Animation */
+        .mic-recording {
+            animation: micPulse 1.5s infinite;
+        }
+        
+        @keyframes micPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+        
+        .voice-wave {
+            animation: voiceWave 0.8s infinite;
+        }
+        
+        @keyframes voiceWave {
+            0%, 100% { height: 4px; }
+            50% { height: 20px; }
+        }
+        
+        .listening-indicator {
+            animation: listening 2s infinite;
+        }
+        
+        @keyframes listening {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Gemini AI API configuration
+        const GEMINI_API_KEY = 'AIzaSyDYMBZJnAV_vev3RPrJcF-65rGOFYdJ-YA';
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+
+        // AI Career Mentor System Prompt
+        const SYSTEM_PROMPT = `You are Mentora, an expert AI career mentor and advisor. Your role is to provide personalized, actionable career guidance to professionals at all levels. 
+
+Key responsibilities:
+- Provide specific career path recommendations based on user interests and market trends
+- Conduct skill gap analysis and suggest learning roadmaps
+- Offer interview preparation tips and job search strategies
+- Recommend relevant projects, internships, and networking opportunities
+- Give motivational and practical advice for career growth
+
+Guidelines:
+- Keep responses concise but comprehensive (2-4 sentences)
+- Be encouraging and supportive while being realistic
+- Provide specific, actionable advice rather than generic statements
+- Focus on current market demands and emerging technologies
+- Ask follow-up questions to better understand user needs
+
+Always maintain a professional, friendly, and encouraging tone. You are here to guide users toward successful career outcomes.`;
+
+        // Enhanced Background Animation Component
+        const FloatingBackground = () => {
+            const careerIcons = [
+                'fas fa-laptop-code', 'fas fa-chart-line', 'fas fa-graduation-cap', 'fas fa-briefcase', 
+                'fas fa-lightbulb', 'fas fa-cogs', 'fas fa-database', 'fas fa-mobile-alt', 
+                'fas fa-paint-brush', 'fas fa-microscope', 'fas fa-calculator', 'fas fa-book',
+                'fas fa-rocket', 'fas fa-brain', 'fas fa-users', 'fas fa-code', 'fas fa-chart-bar',
+                'fas fa-globe', 'fas fa-shield-alt', 'fas fa-camera'
+            ];
+
+            const educationEmojis = ['📚', '🎓', '📖', '✏️', '📝', '🔬', '🧪', '📊', '💡', '🎯', '🏆', '⭐', '🚀', '💻', '📱'];
+            
+            const colors = ['blue', 'purple', 'green', 'yellow', 'pink', 'indigo'];
+            const speeds = ['', 'slow', 'fast'];
+
+            return (
+                <div className="floating-background">
+                    {/* Career Icons floating upward */}
+                    {Array.from({ length: 20 }, (_, i) => (
+                        <div
+                            key={`career-${i}`}
+                            className={`floating-element ${colors[i % colors.length]} ${speeds[i % speeds.length]}`}
+                            style={{
+                                left: (i * 5 + Math.random() * 10) + '%',
+                                animationDelay: (i * 1.2) + 's'
+                            }}
+                        >
+                            <i className={careerIcons[i % careerIcons.length]}></i>
+                        </div>
+                    ))}
+
+                    {/* Education Emojis floating downward */}
+                    {Array.from({ length: 15 }, (_, i) => (
+                        <div
+                            key={`edu-${i}`}
+                            className="floating-element-down"
+                            style={{
+                                left: (i * 6.5 + Math.random() * 8) + '%',
+                                animationDelay: (i * 2) + 's'
+                            }}
+                        >
+                            {educationEmojis[i % educationEmojis.length]}
+                        </div>
+                    ))}
+
+                    {/* Horizontal floating elements */}
+                    {Array.from({ length: 10 }, (_, i) => (
+                        <div
+                            key={`horizontal-${i}`}
+                            className="floating-horizontal"
+                            style={{
+                                top: (i * 10 + 5) + '%',
+                                animationDelay: (i * 4) + 's'
+                            }}
+                        >
+                            <i className={careerIcons[(i + 10) % careerIcons.length]}></i>
+                        </div>
+                    ))}
+
+                    {/* Geometric shapes */}
+                    {Array.from({ length: 12 }, (_, i) => (
+                        <div
+                            key={`shape-${i}`}
+                            className="geometric-shape"
+                            style={{
+                                left: (i * 8 + Math.random() * 5) + '%',
+                                animationDelay: (i * 2.5) + 's'
+                            }}
+                        >
+                            <div className={
+                                i % 3 === 0 ? 'shape-circle' : 
+                                i % 3 === 1 ? 'shape-square' : 'shape-triangle'
+                            }></div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // Navigation Component
+        const Navbar = ({ currentPage, setCurrentPage }) => {
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+            const navItems = [
+                { id: 'home', label: 'Home', icon: 'fas fa-home' },
+                { id: 'features', label: 'Features', icon: 'fas fa-star' },
+                { id: 'career-paths', label: 'Career Paths', icon: 'fas fa-route' },
+                { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-line' },
+                { id: 'about', label: 'About', icon: 'fas fa-info-circle' },
+                { id: 'contact', label: 'Contact', icon: 'fas fa-envelope' }
+            ];
+
+            return (
+                <nav className="bg-white shadow-lg sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between h-16">
+                            <div className="flex items-center">
+                                <div className="flex-shrink-0 flex items-center">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                                        <i className="fas fa-brain text-white text-lg"></i>
+                                    </div>
+                                    <span className="ml-3 text-2xl font-bold text-gray-900">Mentora</span>
+                                </div>
+                            </div>
+
+                            {/* Desktop Navigation */}
+                            <div className="hidden md:flex items-center space-x-8">
+                                {navItems.map(item => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => setCurrentPage(item.id)}
+                                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                            currentPage === item.id
+                                                ? 'text-blue-600 bg-blue-50'
+                                                : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <i className={`${item.icon} mr-2`}></i>
+                                        {item.label}
+                                    </button>
+                                ))}
+                                <div className="flex space-x-2">
+                                    <button 
+                                        onClick={() => setCurrentPage('login')}
+                                        className="text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-all"
+                                    >
+                                        Login
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('signup')}
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all"
+                                    >
+                                        Sign Up
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Mobile menu button */}
+                            <div className="md:hidden flex items-center">
+                                <button
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    className="text-gray-700 hover:text-blue-600 focus:outline-none"
+                                >
+                                    <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Mobile Navigation */}
+                        {isMenuOpen && (
+                            <div className="md:hidden">
+                                <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+                                    {navItems.map(item => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => {
+                                                setCurrentPage(item.id);
+                                                setIsMenuOpen(false);
+                                            }}
+                                            className={`flex items-center w-full px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                                                currentPage === item.id
+                                                    ? 'text-blue-600 bg-blue-50'
+                                                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <i className={`${item.icon} mr-3`}></i>
+                                            {item.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </nav>
+            );
+        };
+
+        // Enhanced Chatbot Component with Working Microphone
+        const Chatbot = ({ isOpen, setIsOpen }) => {
+            const [messages, setMessages] = useState([
+                {
+                    id: 1,
+                    text: "Hi! I'm your AI career mentor. I can help you with career guidance, skill assessments, learning paths, and more. What would you like to explore today?",
+                    sender: 'bot',
+                    timestamp: new Date()
+                }
+            ]);
+            const [inputText, setInputText] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const [isRecording, setIsRecording] = useState(false);
+            const [recognition, setRecognition] = useState(null);
+            const [isListening, setIsListening] = useState(false);
+            const [microphoneSupported, setMicrophoneSupported] = useState(false);
+            const messagesEndRef = useRef(null);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages]);
+
+            // Initialize speech recognition with enhanced error handling
+            useEffect(() => {
+                const initializeSpeechRecognition = () => {
+                    console.log('Initializing speech recognition...');
+                    
+                    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                        console.log('Speech recognition not supported');
+                        setMicrophoneSupported(false);
+                        return;
+                    }
+
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognitionInstance = new SpeechRecognition();
+                    
+                    recognitionInstance.continuous = false;
+                    recognitionInstance.interimResults = true;
+                    recognitionInstance.lang = 'en-US';
+                    recognitionInstance.maxAlternatives = 1;
+                    
+                    recognitionInstance.onstart = () => {
+                        console.log('Speech recognition started');
+                        setIsListening(true);
+                        setIsRecording(true);
+                    };
+                    
+                    recognitionInstance.onresult = (event) => {
+                        console.log('Speech recognition result:', event);
+                        let finalTranscript = '';
+                        let interimTranscript = '';
+                        
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const transcript = event.results[i][0].transcript;
+                            if (event.results[i].isFinal) {
+                                finalTranscript += transcript;
+                            } else {
+                                interimTranscript += transcript;
+                            }
+                        }
+                        
+                        if (finalTranscript) {
+                            console.log('Final transcript:', finalTranscript);
+                            setInputText(finalTranscript.trim());
+                        } else if (interimTranscript) {
+                            console.log('Interim transcript:', interimTranscript);
+                            setInputText(interimTranscript.trim());
+                        }
+                    };
+                    
+                    recognitionInstance.onerror = (event) => {
+                        console.error('Speech recognition error:', event.error);
+                        setIsRecording(false);
+                        setIsListening(false);
+                        
+                        switch (event.error) {
+                            case 'not-allowed':
+                                alert('Microphone access denied. Please allow microphone access and try again.');
+                                break;
+                            case 'no-speech':
+                                alert('No speech detected. Please try speaking again.');
+                                break;
+                            case 'audio-capture':
+                                alert('No microphone found. Please check your microphone connection.');
+                                break;
+                            case 'network':
+                                alert('Network error occurred. Please check your internet connection.');
+                                break;
+                            default:
+                                alert(`Speech recognition error: ${event.error}`);
+                        }
+                    };
+                    
+                    recognitionInstance.onend = () => {
+                        console.log('Speech recognition ended');
+                        setIsRecording(false);
+                        setIsListening(false);
+                    };
+                    
+                    setRecognition(recognitionInstance);
+                    setMicrophoneSupported(true);
+                    console.log('Speech recognition initialized successfully');
+                };
+
+                initializeSpeechRecognition();
+            }, []);
+
+            const requestMicrophonePermission = async () => {
+                try {
+                    console.log('Requesting microphone permission...');
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    console.log('Microphone permission granted');
+                    stream.getTracks().forEach(track => track.stop()); // Stop the stream immediately
+                    return true;
+                } catch (error) {
+                    console.error('Microphone permission denied:', error);
+                    alert('Microphone access is required for voice input. Please allow microphone access in your browser settings.');
+                    return false;
+                }
+            };
+
+            const startVoiceRecording = async () => {
+                if (!recognition) {
+                    alert('Speech recognition is not supported in your browser. Please try Chrome, Safari, or Edge.');
+                    return;
+                }
+
+                if (isRecording) {
+                    console.log('Already recording, stopping...');
+                    recognition.stop();
+                    return;
+                }
+
+                console.log('Starting voice recording...');
+                
+                // Request microphone permission first
+                const hasPermission = await requestMicrophonePermission();
+                if (!hasPermission) {
+                    return;
+                }
+
+                try {
+                    setInputText(''); // Clear input before starting
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting speech recognition:', error);
+                    alert('Failed to start voice recording. Please try again.');
+                }
+            };
+
+            const stopVoiceRecording = () => {
+                if (recognition && isRecording) {
+                    console.log('Stopping voice recording...');
+                    recognition.stop();
+                }
+            };
+
+            const getAIResponse = async (userMessage) => {
+                try {
+                    console.log('Sending request to Gemini API...');
+                    
+                    const requestBody = {
+                        contents: [{
+                            parts: [{
+                                text: `${SYSTEM_PROMPT}\n\nUser: ${userMessage}\n\nMentora:`
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 512,
+                        },
+                        safetySettings: [
+                            {
+                                category: "HARM_CATEGORY_HARASSMENT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_HATE_SPEECH",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                            }
+                        ]
+                    };
+
+                    const response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        console.error('API Error:', data);
+                        throw new Error(`API request failed: ${response.status} - ${data.error?.message || 'Unknown error'}`);
+                    }
+                    
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                        return data.candidates[0].content.parts[0].text.trim();
+                    } else if (data.candidates && data.candidates[0] && data.candidates[0].finishReason === 'SAFETY') {
+                        return "I understand you're looking for career guidance. Let me help you with professional development, skill building, or career planning. What specific area would you like to focus on?";
+                    } else {
+                        console.error('Unexpected response format:', data);
+                        throw new Error('Invalid response format from API');
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    
+                    if (error.message.includes('403')) {
+                        return "I'm having trouble accessing my AI capabilities right now. This might be due to API limitations. Please try again in a moment, or feel free to ask me about career paths, skill development, or job search strategies!";
+                    } else if (error.message.includes('429')) {
+                        return "I'm getting a lot of requests right now! Please wait a moment and try again. I'm here to help with your career development.";
+                    } else {
+                        return "I'm experiencing some technical difficulties, but I'm still here to help! Try asking me about career guidance, skill assessments, learning paths, or job search strategies. What would you like to know?";
+                    }
+                }
+            };
+
+            const handleSendMessage = async () => {
+                if (!inputText.trim()) return;
+
+                const userMessage = {
+                    id: messages.length + 1,
+                    text: inputText,
+                    sender: 'user',
+                    timestamp: new Date()
+                };
+
+                setMessages(prev => [...prev, userMessage]);
+                setInputText('');
+                setIsTyping(true);
+
+                try {
+                    const aiResponseText = await getAIResponse(inputText);
+                    const aiResponse = {
+                        id: messages.length + 2,
+                        text: aiResponseText,
+                        sender: 'bot',
+                        timestamp: new Date()
+                    };
+                    
+                    setMessages(prev => [...prev, aiResponse]);
+                    setIsTyping(false);
+                } catch (error) {
+                    console.error('Error getting AI response:', error);
+                    const errorResponse = {
+                        id: messages.length + 2,
+                        text: "I apologize, but I'm having trouble connecting right now. Please try again in a moment. I'm here to help with your career development!",
+                        sender: 'bot',
+                        timestamp: new Date()
+                    };
+                    
+                    setMessages(prev => [...prev, errorResponse]);
+                    setIsTyping(false);
+                }
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            };
+
+            if (!isOpen) {
+                return (
+                    <div className="floating-chat">
+                        <button
+                            onClick={() => setIsOpen(true)}
+                            className="w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+                        >
+                            <i className="fas fa-comments text-xl"></i>
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <>
+                    <div className="floating-chat">
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="w-14 h-14 bg-gray-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+                        >
+                            <i className="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div className="chat-window bg-white rounded-lg shadow-2xl flex flex-col chat-animation">
+                        {/* Chat Header */}
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg">
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                    <i className="fas fa-robot text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold">AI Career Mentor</h3>
+                                    <p className="text-sm opacity-90">
+                                        Online • {microphoneSupported ? 'Voice & Text Ready' : 'Text Ready'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Messages */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{maxHeight: '350px'}}>
+                            {messages.map((message) => (
+                                <div
+                                    key={message.id}
+                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                        message.sender === 'user'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-100 text-gray-800'
+                                    }`}>
+                                        <p className="text-sm">{message.text}</p>
+                                        <p className={`text-xs mt-1 ${
+                                            message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                                        }`}>
+                                            {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            {isTyping && (
+                                <div className="flex justify-start">
+                                    <div className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">
+                                        <div className="flex space-x-1">
+                                            <div className="w-2 h-2 bg-gray-400 rounded-full typing-indicator"></div>
+                                            <div className="w-2 h-2 bg-gray-400 rounded-full typing-indicator" style={{animationDelay: '0.2s'}}></div>
+                                            <div className="w-2 h-2 bg-gray-400 rounded-full typing-indicator" style={{animationDelay: '0.4s'}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Input */}
+                        <div className="p-4 border-t">
+                            {isListening && (
+                                <div className="mb-3 flex items-center justify-center space-x-2 text-red-600 listening-indicator">
+                                    <i className="fas fa-microphone"></i>
+                                    <span className="text-sm font-medium">Listening...</span>
+                                    <div className="flex space-x-1">
+                                        <div className="w-1 bg-red-500 voice-wave" style={{animationDelay: '0s'}}></div>
+                                        <div className="w-1 bg-red-500 voice-wave" style={{animationDelay: '0.1s'}}></div>
+                                        <div className="w-1 bg-red-500 voice-wave" style={{animationDelay: '0.2s'}}></div>
+                                        <div className="w-1 bg-red-500 voice-wave" style={{animationDelay: '0.3s'}}></div>
+                                        <div className="w-1 bg-red-500 voice-wave" style={{animationDelay: '0.4s'}}></div>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="flex space-x-2">
+                                <input
+                                    type="text"
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                    placeholder={microphoneSupported ? "Type or click mic to speak..." : "Type your message..."}
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                />
+                                {microphoneSupported && (
+                                    <button
+                                        onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                                        className={`px-4 py-2 rounded-lg transition-all ${
+                                            isRecording 
+                                                ? 'bg-red-600 text-white mic-recording' 
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                        title={isRecording ? 'Stop recording' : 'Start voice input'}
+                                    >
+                                        <i className={`fas ${isRecording ? 'fa-stop' : 'fa-microphone'}`}></i>
+                                    </button>
+                                )}
+                                <button
+                                    onClick={handleSendMessage}
+                                    disabled={!inputText.trim()}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <i className="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            {!microphoneSupported && (
+                                <p className="text-xs text-gray-500 mt-2 text-center">
+                                    Voice input not supported in this browser. Try Chrome, Safari, or Edge.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </>
+            );
+        };
+
+        // Hero Section Component
+        const HeroSection = ({ setCurrentPage, setChatOpen }) => {
+            return (
+                <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                            <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                                <div className="sm:text-center lg:text-left">
+                                    <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                                        <span className="block xl:inline">Your Personal</span>
+                                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 xl:inline">
+                                            AI Career Mentor
+                                        </span>
+                                    </h1>
+                                    <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                                        Guiding Skills, Shaping Futures. Get personalized career guidance, skill assessments, and learning roadmaps powered by AI with voice interaction.
+                                    </p>
+                                    <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                                        <div className="rounded-md shadow">
+                                            <button
+                                                onClick={() => setCurrentPage('dashboard')}
+                                                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 md:py-4 md:text-lg md:px-10 transition-all"
+                                            >
+                                                Get Started
+                                                <i className="fas fa-arrow-right ml-2"></i>
+                                            </button>
+                                        </div>
+                                        <div className="mt-3 sm:mt-0 sm:ml-3">
+                                            <button
+                                                onClick={() => setChatOpen(true)}
+                                                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 border-blue-600 md:py-4 md:text-lg md:px-10 transition-all"
+                                            >
+                                                <i className="fas fa-microphone mr-2"></i>
+                                                Voice Chat with AI
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                    <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+                        <div className="h-56 w-full sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
+                            <div className="text-center">
+                                <div className="w-64 h-64 mx-auto bg-white rounded-full shadow-2xl flex items-center justify-center">
+                                    <i className="fas fa-robot text-8xl text-blue-600"></i>
+                                </div>
+                                <p className="mt-4 text-lg font-medium text-gray-700">AI-Powered Career Guidance</p>
+                                <p className="text-sm text-gray-600">Now with Voice Interaction!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Features Section Component
+        const FeaturesSection = ({ setCurrentPage }) => {
+            const features = [
+                {
+                    icon: 'fas fa-microphone',
+                    title: 'Voice-Enabled AI Chat',
+                    description: 'Speak naturally with our AI mentor using advanced voice recognition technology.',
+                    color: 'from-red-500 to-red-600',
+                    page: 'home'
+                },
+                {
+                    icon: 'fas fa-route',
+                    title: 'Career Path Mapping',
+                    description: 'Discover personalized career paths based on your skills, interests, and market trends.',
+                    color: 'from-blue-500 to-blue-600',
+                    page: 'career-paths'
+                },
+                {
+                    icon: 'fas fa-chart-gap',
+                    title: 'Skill Gap Analysis',
+                    description: 'Identify skill gaps and get targeted recommendations to advance your career.',
+                    color: 'from-purple-500 to-purple-600',
+                    page: 'skill-analysis'
+                },
+                {
+                    icon: 'fas fa-map',
+                    title: 'Personalized Roadmap',
+                    description: 'Get step-by-step learning plans tailored to your career goals and timeline.',
+                    color: 'from-green-500 to-green-600',
+                    page: 'dashboard'
+                },
+                {
+                    icon: 'fas fa-briefcase',
+                    title: 'Internship & Projects',
+                    description: 'Find relevant internships and project ideas to build your portfolio.',
+                    color: 'from-orange-500 to-orange-600',
+                    page: 'dashboard'
+                },
+                {
+                    icon: 'fas fa-chart-line',
+                    title: 'Progress Tracking',
+                    description: 'Monitor your learning progress with interactive dashboards and analytics.',
+                    color: 'from-indigo-500 to-indigo-600',
+                    page: 'dashboard'
+                }
+            ];
+
+            return (
+                <div className="py-16 bg-white relative z-10">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center">
+                            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                                Powerful Features for Your Success
+                            </h2>
+                            <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+                                Everything you need to accelerate your career growth in one platform
+                            </p>
+                        </div>
+
+                        <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                            {features.map((feature, index) => (
+                                <div 
+                                    key={index} 
+                                    className="card-hover bg-white p-6 rounded-xl shadow-lg border border-gray-100 cursor-pointer"
+                                    onClick={() => setCurrentPage && setCurrentPage(feature.page)}
+                                >
+                                    <div className={`w-12 h-12 bg-gradient-to-r ${feature.color} rounded-lg flex items-center justify-center mb-4`}>
+                                        <i className={`${feature.icon} text-white text-xl`}></i>
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                                    <p className="text-gray-600 mb-4">{feature.description}</p>
+                                    <div className="flex items-center text-blue-600 font-medium">
+                                        <span>Explore</span>
+                                        <i className="fas fa-arrow-right ml-2"></i>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Career Path Page Component
+        const CareerPathPage = () => {
+            const [selectedPath, setSelectedPath] = useState(null);
+            const [userProfile, setUserProfile] = useState({
+                skills: ['JavaScript', 'React', 'HTML/CSS'],
+                interests: ['Web Development', 'User Experience'],
+                experience: 'Intermediate',
+                goals: 'Senior Developer'
+            });
+
+            const careerPaths = [
+                {
+                    id: 1,
+                    title: 'Full Stack Developer',
+                    description: 'Master both frontend and backend development',
+                    match: 92,
+                    duration: '12-18 months',
+                    salary: '75k - 120k',
+                    demand: 'High',
+                    icon: 'fas fa-code',
+                    color: 'from-blue-500 to-blue-600',
+                    skills: ['React', 'Node.js', 'MongoDB', 'Express', 'TypeScript'],
+                    roadmap: [
+                        { phase: 'Foundation', duration: '3 months', topics: ['Advanced JavaScript', 'ES6+', 'Async Programming'] },
+                        { phase: 'Frontend Mastery', duration: '4 months', topics: ['React Ecosystem', 'State Management', 'Testing'] },
+                        { phase: 'Backend Development', duration: '4 months', topics: ['Node.js', 'Databases', 'APIs', 'Authentication'] },
+                        { phase: 'DevOps & Deployment', duration: '3 months', topics: ['Docker', 'AWS', 'CI/CD', 'Monitoring'] },
+                        { phase: 'Portfolio Projects', duration: '4 months', topics: ['E-commerce App', 'Social Platform', 'Real-time Chat'] }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: 'Frontend Specialist',
+                    description: 'Focus on creating amazing user interfaces',
+                    match: 88,
+                    duration: '8-12 months',
+                    salary: '65k - 100k',
+                    demand: 'High',
+                    icon: 'fas fa-paint-brush',
+                    color: 'from-purple-500 to-purple-600',
+                    skills: ['React', 'Vue.js', 'CSS3', 'TypeScript', 'Design Systems'],
+                    roadmap: [
+                        { phase: 'Advanced CSS', duration: '2 months', topics: ['Flexbox/Grid', 'Animations', 'Responsive Design'] },
+                        { phase: 'React Mastery', duration: '3 months', topics: ['Hooks', 'Context', 'Performance Optimization'] },
+                        { phase: 'Modern Tools', duration: '2 months', topics: ['Webpack', 'Vite', 'Testing Library'] },
+                        { phase: 'Design Systems', duration: '2 months', topics: ['Component Libraries', 'Storybook', 'Figma'] },
+                        { phase: 'Advanced Projects', duration: '3 months', topics: ['PWA', 'Micro-frontends', 'Performance'] }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: 'Backend Engineer',
+                    description: 'Build scalable server-side applications',
+                    match: 75,
+                    duration: '10-14 months',
+                    salary: '70k - 110k',
+                    demand: 'Very High',
+                    icon: 'fas fa-server',
+                    color: 'from-green-500 to-green-600',
+                    skills: ['Node.js', 'Python', 'PostgreSQL', 'Redis', 'Microservices'],
+                    roadmap: [
+                        { phase: 'Server Fundamentals', duration: '3 months', topics: ['HTTP', 'REST APIs', 'Authentication'] },
+                        { phase: 'Database Design', duration: '3 months', topics: ['SQL', 'NoSQL', 'Data Modeling'] },
+                        { phase: 'Scalability', duration: '3 months', topics: ['Caching', 'Load Balancing', 'Microservices'] },
+                        { phase: 'Cloud & DevOps', duration: '3 months', topics: ['AWS/GCP', 'Docker', 'Kubernetes'] },
+                        { phase: 'System Design', duration: '2 months', topics: ['Architecture', 'Patterns', 'Best Practices'] }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: 'DevOps Engineer',
+                    description: 'Streamline development and deployment processes',
+                    match: 68,
+                    duration: '12-16 months',
+                    salary: '80k - 130k',
+                    demand: 'Very High',
+                    icon: 'fas fa-cogs',
+                    color: 'from-orange-500 to-orange-600',
+                    skills: ['Docker', 'Kubernetes', 'AWS', 'Terraform', 'Jenkins'],
+                    roadmap: [
+                        { phase: 'Linux & Scripting', duration: '2 months', topics: ['Bash', 'Linux Administration', 'Networking'] },
+                        { phase: 'Containerization', duration: '3 months', topics: ['Docker', 'Container Orchestration'] },
+                        { phase: 'Cloud Platforms', duration: '4 months', topics: ['AWS/Azure', 'Infrastructure as Code'] },
+                        { phase: 'CI/CD Pipelines', duration: '3 months', topics: ['Jenkins', 'GitLab CI', 'Automation'] },
+                        { phase: 'Monitoring & Security', duration: '4 months', topics: ['Prometheus', 'ELK Stack', 'Security'] }
+                    ]
+                },
+                {
+                    id: 5,
+                    title: 'Mobile Developer',
+                    description: 'Create native and cross-platform mobile apps',
+                    match: 72,
+                    duration: '10-14 months',
+                    salary: '70k - 115k',
+                    demand: 'High',
+                    icon: 'fas fa-mobile-alt',
+                    color: 'from-pink-500 to-pink-600',
+                    skills: ['React Native', 'Flutter', 'Swift', 'Kotlin', 'Firebase'],
+                    roadmap: [
+                        { phase: 'Mobile Fundamentals', duration: '2 months', topics: ['Mobile UI/UX', 'Platform Guidelines'] },
+                        { phase: 'Cross-Platform', duration: '4 months', topics: ['React Native', 'Navigation', 'State Management'] },
+                        { phase: 'Native Development', duration: '4 months', topics: ['iOS/Android', 'Platform APIs'] },
+                        { phase: 'Backend Integration', duration: '2 months', topics: ['APIs', 'Authentication', 'Push Notifications'] },
+                        { phase: 'App Store Deployment', duration: '2 months', topics: ['Publishing', 'Analytics', 'Monetization'] }
+                    ]
+                },
+                {
+                    id: 6,
+                    title: 'Data Scientist',
+                    description: 'Extract insights from data using ML and AI',
+                    match: 45,
+                    duration: '15-20 months',
+                    salary: '85k - 140k',
+                    demand: 'Very High',
+                    icon: 'fas fa-chart-line',
+                    color: 'from-indigo-500 to-indigo-600',
+                    skills: ['Python', 'Machine Learning', 'SQL', 'TensorFlow', 'Statistics'],
+                    roadmap: [
+                        { phase: 'Math & Statistics', duration: '4 months', topics: ['Statistics', 'Linear Algebra', 'Probability'] },
+                        { phase: 'Python for Data', duration: '3 months', topics: ['Pandas', 'NumPy', 'Matplotlib'] },
+                        { phase: 'Machine Learning', duration: '5 months', topics: ['Scikit-learn', 'Algorithms', 'Model Selection'] },
+                        { phase: 'Deep Learning', duration: '4 months', topics: ['TensorFlow', 'Neural Networks', 'Computer Vision'] },
+                        { phase: 'Real-world Projects', duration: '4 months', topics: ['End-to-end ML', 'Deployment', 'MLOps'] }
+                    ]
+                }
+            ];
+
+            const PathCard = ({ path, onClick }) => (
+                <div 
+                    className="bg-white rounded-xl shadow-lg p-6 cursor-pointer card-hover border border-gray-100"
+                    onClick={() => onClick(path)}
+                >
+                    <div className="flex items-start justify-between mb-4">
+                        <div className={`w-12 h-12 bg-gradient-to-r ${path.color} rounded-lg flex items-center justify-center`}>
+                            <i className={`${path.icon} text-white text-xl`}></i>
+                        </div>
+                        <div className="text-right">
+                            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                path.match >= 80 ? 'bg-green-100 text-green-800' :
+                                path.match >= 60 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                                {path.match}% Match
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{path.title}</h3>
+                    <p className="text-gray-600 mb-4">{path.description}</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Duration</p>
+                            <p className="font-medium text-gray-900">{path.duration}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Salary Range</p>
+                            <p className="font-medium text-gray-900">{path.salary}</p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <div className={`w-2 h-2 rounded-full mr-2 ${
+                                path.demand === 'Very High' ? 'bg-green-500' : 'bg-blue-500'
+                            }`}></div>
+                            <span className="text-sm text-gray-600">{path.demand} Demand</span>
+                        </div>
+                        <div className="flex items-center text-blue-600 font-medium">
+                            <span className="text-sm">View Details</span>
+                            <i className="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const PathDetails = ({ path, onBack }) => (
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div className={`bg-gradient-to-r ${path.color} p-6 text-white`}>
+                        <button 
+                            onClick={onBack}
+                            className="mb-4 flex items-center text-white hover:text-gray-200 transition-colors"
+                        >
+                            <i className="fas fa-arrow-left mr-2"></i>
+                            Back to Paths
+                        </button>
+                        <div className="flex items-center">
+                            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                                <i className={`${path.icon} text-2xl`}></i>
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold">{path.title}</h2>
+                                <p className="text-lg opacity-90">{path.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-gray-900">{path.match}%</div>
+                                <div className="text-sm text-gray-500">Match Score</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-gray-900">{path.duration}</div>
+                                <div className="text-sm text-gray-500">Timeline</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-gray-900">{path.salary}</div>
+                                <div className="text-sm text-gray-500">Salary Range</div>
+                            </div>
+                        </div>
+                        
+                        <div className="mb-8">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Required Skills</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {path.skills.map((skill, index) => (
+                                    <span 
+                                        key={index}
+                                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                            userProfile.skills.includes(skill) 
+                                                ? 'bg-green-100 text-green-800' 
+                                                : 'bg-gray-100 text-gray-800'
+                                        }`}
+                                    >
+                                        {userProfile.skills.includes(skill) && <i className="fas fa-check mr-1"></i>}
+                                        {skill}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Learning Roadmap</h3>
+                            <div className="space-y-4">
+                                {path.roadmap.map((phase, index) => (
+                                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-medium text-gray-900">Phase {index + 1}: {phase.phase}</h4>
+                                            <span className="text-sm text-gray-500">{phase.duration}</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {phase.topics.map((topic, topicIndex) => (
+                                                <span 
+                                                    key={topicIndex}
+                                                    className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs"
+                                                >
+                                                    {topic}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="mt-8 flex space-x-4">
+                            <button className={`flex-1 bg-gradient-to-r ${path.color} text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all`}>
+                                <i className="fas fa-play mr-2"></i>
+                                Start This Path
+                            </button>
+                            <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all">
+                                <i className="fas fa-bookmark mr-2"></i>
+                                Save for Later
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50 py-8 relative z-10">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        {!selectedPath ? (
+                            <>
+                                <div className="text-center mb-12">
+                                    <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
+                                        Discover Your Career Path
+                                    </h1>
+                                    <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+                                        AI-powered recommendations based on your skills, interests, and market demand
+                                    </p>
+                                </div>
+
+                                <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Profile Summary</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div>
+                                            <p className="text-sm text-gray-500 mb-1">Current Skills</p>
+                                            <div className="flex flex-wrap gap-1">
+                                                {userProfile.skills.map((skill, index) => (
+                                                    <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500 mb-1">Interests</p>
+                                            <div className="flex flex-wrap gap-1">
+                                                {userProfile.interests.map((interest, index) => (
+                                                    <span key={index} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                                        {interest}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500 mb-1">Experience Level</p>
+                                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                                {userProfile.experience}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500 mb-1">Career Goal</p>
+                                            <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
+                                                {userProfile.goals}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {careerPaths
+                                        .sort((a, b) => b.match - a.match)
+                                        .map(path => (
+                                            <PathCard 
+                                                key={path.id} 
+                                                path={path} 
+                                                onClick={setSelectedPath}
+                                            />
+                                        ))}
+                                </div>
+                            </>
+                        ) : (
+                            <PathDetails 
+                                path={selectedPath} 
+                                onBack={() => setSelectedPath(null)}
+                            />
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Dashboard Component
+        const Dashboard = () => {
+            const [skillsData] = useState([
+                { skill: 'JavaScript', current: 75, target: 90 },
+                { skill: 'React', current: 60, target: 85 },
+                { skill: 'Node.js', current: 45, target: 80 },
+                { skill: 'Python', current: 70, target: 85 },
+                { skill: 'SQL', current: 55, target: 75 }
+            ]);
+
+            const [roadmapSteps] = useState([
+                { title: 'Complete JavaScript Fundamentals', status: 'completed', duration: '2 weeks' },
+                { title: 'Learn React.js Framework', status: 'in-progress', duration: '4 weeks' },
+                { title: 'Build Portfolio Projects', status: 'upcoming', duration: '6 weeks' },
+                { title: 'Study System Design', status: 'upcoming', duration: '3 weeks' },
+                { title: 'Practice Technical Interviews', status: 'upcoming', duration: '2 weeks' }
+            ]);
+
+            const [projects] = useState([
+                { title: 'E-commerce Website', tech: 'React, Node.js', difficulty: 'Intermediate', duration: '3 weeks' },
+                { title: 'Task Management App', tech: 'React, Firebase', difficulty: 'Beginner', duration: '2 weeks' },
+                { title: 'Data Visualization Dashboard', tech: 'Python, D3.js', difficulty: 'Advanced', duration: '4 weeks' }
+            ]);
+
+            return (
+                <div className="min-h-screen bg-gray-50 py-8 relative z-10">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="mb-8">
+                            <h1 className="text-3xl font-bold text-gray-900">Career Dashboard</h1>
+                            <p className="mt-2 text-gray-600">Track your progress and plan your next steps</p>
+                        </div>
+
+                        {/* Skills Progress */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <div className="bg-white rounded-xl shadow-lg p-6">
+                                <h2 className="text-xl font-semibold text-gray-900 mb-6">Skill Gap Analysis</h2>
+                                <div className="space-y-4">
+                                    {skillsData.map((skill, index) => (
+                                        <div key={index}>
+                                            <div className="flex justify-between mb-2">
+                                                <span className="text-sm font-medium text-gray-700">{skill.skill}</span>
+                                                <span className="text-sm text-gray-500">{skill.current}% / {skill.target}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="bg-blue-600 h-2 rounded-full progress-bar" style={{width: `${skill.current}%`}}></div>
+                                                <div className="bg-purple-300 h-2 rounded-full mt-1" style={{width: `${skill.target}%`}}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-xl shadow-lg p-6">
+                                <h2 className="text-xl font-semibold text-gray-900 mb-6">Learning Roadmap</h2>
+                                <div className="space-y-4">
+                                    {roadmapSteps.map((step, index) => (
+                                        <div key={index} className="flex items-center">
+                                            <div className={`w-4 h-4 rounded-full mr-4 ${
+                                                step.status === 'completed' ? 'bg-green-500' :
+                                                step.status === 'in-progress' ? 'bg-blue-500' : 'bg-gray-300'
+                                            }`}></div>
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-medium text-gray-900">{step.title}</h3>
+                                                <p className="text-xs text-gray-500">{step.duration}</p>
+                                            </div>
+                                            <span className={`px-2 py-1 text-xs rounded-full ${
+                                                step.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                                step.status === 'in-progress' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                            }`}>
+                                                {step.status.replace('-', ' ')}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Project Suggestions */}
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <h2 className="text-xl font-semibold text-gray-900 mb-6">Recommended Projects</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {projects.map((project, index) => (
+                                    <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                        <h3 className="font-semibold text-gray-900 mb-2">{project.title}</h3>
+                                        <p className="text-sm text-gray-600 mb-2">{project.tech}</p>
+                                        <div className="flex justify-between items-center">
+                                            <span className={`px-2 py-1 text-xs rounded-full ${
+                                                project.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
+                                                project.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                                            }`}>
+                                                {project.difficulty}
+                                            </span>
+                                            <span className="text-xs text-gray-500">{project.duration}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // About Page Component
+        const AboutPage = () => {
+            return (
+                <div className="min-h-screen bg-white py-16 relative z-10">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-16">
+                            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
+                                About Mentora
+                            </h1>
+                            <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+                                Empowering careers through AI-driven guidance and personalized learning
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                            <div>
+                                <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
+                                <p className="text-lg text-gray-600 mb-4">
+                                    At Mentora, we believe everyone deserves access to personalized career guidance. Our AI-powered platform democratizes career mentorship, making it accessible to professionals at every stage of their journey.
+                                </p>
+                                <p className="text-lg text-gray-600">
+                                    We combine cutting-edge artificial intelligence with proven career development methodologies to provide insights that were once available only through expensive personal coaching.
+                                </p>
+                            </div>
+                            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 text-center">
+                                <i className="fas fa-lightbulb text-6xl text-blue-600 mb-4"></i>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">Innovation Driven</h3>
+                                <p className="text-gray-600">Leveraging AI to provide personalized career insights</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                            <div className="text-center">
+                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i className="fas fa-users text-blue-600 text-2xl"></i>
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">50K+ Users</h3>
+                                <p className="text-gray-600">Professionals trust Mentora for career guidance</p>
+                            </div>
+                            <div className="text-center">
+                                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i className="fas fa-chart-line text-purple-600 text-2xl"></i>
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">85% Success Rate</h3>
+                                <p className="text-gray-600">Users achieve their career goals faster</p>
+                            </div>
+                            <div className="text-center">
+                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i className="fas fa-globe text-green-600 text-2xl"></i>
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">Global Reach</h3>
+                                <p className="text-gray-600">Supporting careers across 50+ countries</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-center text-white">
+                            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Career?</h2>
+                            <p className="text-xl mb-6">Join thousands of professionals who've accelerated their growth with Mentora</p>
+                            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                                Start Your Journey
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Contact Page Component
+        const ContactPage = () => {
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                message: ''
+            });
+            const [isSubmitted, setIsSubmitted] = useState(false);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                // Mock form submission
+                setIsSubmitted(true);
+                setTimeout(() => setIsSubmitted(false), 3000);
+                setFormData({ name: '', email: '', message: '' });
+            };
+
+            const handleChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 py-16 relative z-10">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-16">
+                            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
+                                Get in Touch
+                            </h1>
+                            <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
+                                Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                            <div>
+                                <div className="bg-white rounded-xl shadow-lg p-8">
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
+                                    {isSubmitted && (
+                                        <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                                            <i className="fas fa-check-circle mr-2"></i>
+                                            Thank you! Your message has been sent successfully.
+                                        </div>
+                                    )}
+                                    <form onSubmit={handleSubmit} className="space-y-6">
+                                        <div>
+                                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                                                Full Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="name"
+                                                name="name"
+                                                value={formData.name}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                placeholder="Your full name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                                Email Address
+                                            </label>
+                                            <input
+                                                type="email"
+                                                id="email"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                placeholder="your.email@example.com"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                                                Message
+                                            </label>
+                                            <textarea
+                                                id="message"
+                                                name="message"
+                                                value={formData.message}
+                                                onChange={handleChange}
+                                                required
+                                                rows="4"
+                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                placeholder="Tell us how we can help you..."
+                                            ></textarea>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all"
+                                        >
+                                            <i className="fas fa-paper-plane mr-2"></i>
+                                            Send Message
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div className="space-y-8">
+                                <div className="bg-white rounded-xl shadow-lg p-8">
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h3>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center">
+                                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i className="fas fa-envelope text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">Email</p>
+                                                <p className="text-gray-600">ameershaik18438@gmail.com</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i className="fas fa-phone text-purple-600"></i>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">Phone</p>
+                                                <p className="text-gray-600">6303366041</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i className="fas fa-map-marker-alt text-green-600"></i>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">Office</p>
+                                                <p className="text-gray-600">NANDYAL, A.P</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8">
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Frequently Asked Questions</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">How does the AI mentoring work?</h4>
+                                            <p className="text-sm text-gray-600 mt-1">Our AI analyzes your profile, skills, and goals to provide personalized career guidance and learning recommendations.</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">Is there a free trial?</h4>
+                                            <p className="text-sm text-gray-600 mt-1">Yes! You can try Mentora free for 14 days with full access to all features.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Login Page Component
+        const LoginPage = ({ setCurrentPage }) => {
+            const [formData, setFormData] = useState({
+                email: '',
+                password: ''
+            });
+            const [isLoading, setIsLoading] = useState(false);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                setIsLoading(true);
+                // Mock login process
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setCurrentPage('dashboard');
+                }, 1500);
+            };
+
+            const handleChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="max-w-md w-full space-y-8">
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i className="fas fa-brain text-white text-2xl"></i>
+                            </div>
+                            <h2 className="text-3xl font-extrabold text-gray-900">Welcome back</h2>
+                            <p className="mt-2 text-sm text-gray-600">
+                                Sign in to your Mentora account
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-xl shadow-lg p-8">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="your.email@example.com"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Enter your password"
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50"
+                                >
+                                    {isLoading ? (
+                                        <div className="flex items-center justify-center">
+                                            <i className="fas fa-spinner fa-spin mr-2"></i>
+                                            Signing in...
+                                        </div>
+                                    ) : (
+                                        'Sign In'
+                                    )}
+                                </button>
+                            </form>
+                            <div className="mt-6 text-center">
+                                <p className="text-sm text-gray-600">
+                                    Don't have an account?{' '}
+                                    <button
+                                        onClick={() => setCurrentPage('signup')}
+                                        className="font-medium text-blue-600 hover:text-blue-500"
+                                    >
+                                        Sign up here
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Sign Up Page Component
+        const SignUpPage = ({ setCurrentPage }) => {
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                password: '',
+                confirmPassword: ''
+            });
+            const [isLoading, setIsLoading] = useState(false);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (formData.password !== formData.confirmPassword) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                setIsLoading(true);
+                // Mock signup process
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setCurrentPage('dashboard');
+                }, 1500);
+            };
+
+            const handleChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="max-w-md w-full space-y-8">
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i className="fas fa-brain text-white text-2xl"></i>
+                            </div>
+                            <h2 className="text-3xl font-extrabold text-gray-900">Create your account</h2>
+                            <p className="mt-2 text-sm text-gray-600">
+                                Join Mentora and accelerate your career
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-xl shadow-lg p-8">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Full Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Your full name"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="your.email@example.com"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Create a strong password"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Confirm Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Confirm your password"
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50"
+                                >
+                                    {isLoading ? (
+                                        <div className="flex items-center justify-center">
+                                            <i className="fas fa-spinner fa-spin mr-2"></i>
+                                            Creating account...
+                                        </div>
+                                    ) : (
+                                        'Create Account'
+                                    )}
+                                </button>
+                            </form>
+                            <div className="mt-6 text-center">
+                                <p className="text-sm text-gray-600">
+                                    Already have an account?{' '}
+                                    <button
+                                        onClick={() => setCurrentPage('login')}
+                                        className="font-medium text-blue-600 hover:text-blue-500"
+                                    >
+                                        Sign in here
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [isChatOpen, setChatOpen] = useState(false);
+
+            const renderPage = () => {
+                switch (currentPage) {
+                    case 'home':
+                        return (
+                            <div>
+                                <HeroSection setCurrentPage={setCurrentPage} setChatOpen={setChatOpen} />
+                                <FeaturesSection setCurrentPage={setCurrentPage} />
+                            </div>
+                        );
+                    case 'features':
+                        return <FeaturesSection setCurrentPage={setCurrentPage} />;
+                    case 'career-paths':
+                        return <CareerPathPage />;
+                    case 'dashboard':
+                        return <Dashboard />;
+                    case 'about':
+                        return <AboutPage />;
+                    case 'contact':
+                        return <ContactPage />;
+                    case 'login':
+                        return <LoginPage setCurrentPage={setCurrentPage} />;
+                    case 'signup':
+                        return <SignUpPage setCurrentPage={setCurrentPage} />;
+                    default:
+                        return (
+                            <div>
+                                <HeroSection setCurrentPage={setCurrentPage} setChatOpen={setChatOpen} />
+                                <FeaturesSection setCurrentPage={setCurrentPage} />
+                            </div>
+                        );
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 relative">
+                    {/* Enhanced Floating Background Elements */}
+                    <FloatingBackground />
+                    
+                    <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                    {renderPage()}
+                    <Chatbot isOpen={isChatOpen} setIsOpen={setChatOpen} />
+                    
+                    {/* Footer */}
+                    <footer className="bg-gray-900 text-white py-12 relative z-10">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                <div className="col-span-1 md:col-span-2">
+                                    <div className="flex items-center mb-4">
+                                        <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                                            <i className="fas fa-brain text-white text-lg"></i>
+                                        </div>
+                                        <span className="ml-3 text-2xl font-bold">Mentora</span>
+                                    </div>
+                                    <p className="text-gray-400 mb-4">
+                                        Empowering careers through AI-driven guidance and personalized learning paths with voice interaction.
+                                    </p>
+                                    <div className="flex space-x-4">
+                                        <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                                            <i className="fab fa-twitter text-xl"></i>
+                                        </a>
+                                        <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                                            <i className="fab fa-linkedin text-xl"></i>
+                                        </a>
+                                        <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                                            <i className="fab fa-github text-xl"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Product</h3>
+                                    <ul className="space-y-2 text-gray-400">
+                                        <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Dashboard</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">AI Mentor</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Voice Chat</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Company</h3>
+                                    <ul className="space-y-2 text-gray-400">
+                                        <li><a href="#" className="hover:text-white transition-colors">About</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                                <p>&copy; 2024 Mentora. All rights reserved. Built with ❤️ for career growth.</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97ff8d6a24ce087b',t:'MTc1ODAxNzIwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
